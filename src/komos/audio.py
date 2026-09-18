@@ -49,4 +49,4 @@ def load_audio(audio: AudioInput, sr: int | None) -> NDArray[np.float32]:
     if waveform.numel() < MIN_SAMPLES:
         message = "Audio is too short after resampling."
         raise AudioInputError(message)
-    return waveform.numpy()
+    return np.asarray(waveform, dtype=np.float32)
