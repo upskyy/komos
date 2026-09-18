@@ -3,9 +3,7 @@ from komos import KOMOS
 dependencies = ["komos", "torch", "torchaudio", "transformers", "numpy", "soundfile"]
 
 
-def komos(
-    model_id: str = "upskyy/komos", device: str = "cpu", revision: str = "main"
-) -> KOMOS:
+def komos(model_id: str = "upskyy/komos", device: str = "cpu", revision: str = "main") -> KOMOS:
     """Load KOMOS weights from Hugging Face."""
     model = KOMOS.from_pretrained(  # pyright: ignore[reportUnknownMemberType]
         model_id, revision=revision

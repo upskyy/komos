@@ -15,7 +15,7 @@ Python 3.11 or later is required. The package is not published on PyPI yet.
 ```bash
 git clone https://github.com/upskyy/komos.git
 cd komos
-uv sync
+uv sync --no-dev
 ```
 
 While the repositories are private, authenticate GitHub before cloning and run `uv run hf auth login` with a Hugging Face account that has model access.
@@ -58,7 +58,17 @@ audio, sr = sf.read("audio.wav", dtype="float32", always_2d=True)
 print(model.score(audio.mean(axis=1), sr=sr))
 ```
 
-File inputs are downmixed to mono and resampled to 16 kHz. Audio longer than 10 seconds is scored in overlapping 10-second windows with a 5-second hop. Raw window scores are averaged before validation-fitted affine calibration and clipping to [1, 5]. Use `model.to("cuda")` for GPU inference.
+File inputs are downmixed to mono and resampled to 16 kHz. By default, KOMOS scores only the first 10 seconds, matching the input processing used for training and evaluation. Longer inputs trigger a warning. The returned score describes the initial segment, not the entire recording.
+
+For optional long-form scoring:
+
+```python
+score = model.score("long_audio.wav", long_form=True)
+```
+
+This mode splits audio into non-overlapping 10-second chunks and weights raw scores by each chunk's duration, including the final partial chunk. Validation-fitted affine calibration and clipping to [1, 5] are applied once after aggregation. This convenience mode has not been validated against human MOS for long recordings.
+
+Both modes return calibrated scores. Use `model.to("cuda")` for GPU inference. The paper's correlation results use raw predictions, and the reported three-seed means are not reproduced by this single checkpoint alone.
 
 Higher scores indicate greater predicted naturalness, not verified pronunciation accuracy. The main test split contains seen TTS systems. Unseen-system results in the paper are an author-screened diagnostic, not independent human-MOS validation.
 

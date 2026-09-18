@@ -1,11 +1,12 @@
-import numpy as np
+import warnings
+
 import torch
 from torch import nn
 from transformers import PretrainedConfig, PreTrainedModel, WhisperFeatureExtractor
 from transformers.models.whisper.modeling_whisper import WhisperEncoder
 from typing_extensions import override
 
-from komos.audio import AudioInput, load_audio
+from komos.audio import AudioInput, AudioTruncationWarning, load_audio
 from komos.config import KOMOSConfig
 
 
@@ -70,24 +71,29 @@ class KOMOS(PreTrainedModel):
         return (frame_scores * mask).sum(-1) / lengths
 
     @torch.inference_mode()
-    def score(self, audio: AudioInput, sr: int | None = None) -> float:
+    def score(self, audio: AudioInput, sr: int | None = None, *, long_form: bool = False) -> float:
         """Return a calibrated MOS in [1, 5] for a file or mono waveform."""
         waveform = load_audio(audio, sr)
         window_size = round(self.mos_config.max_seconds * self.mos_config.sample_rate)
-        if len(waveform) <= window_size:
-            windows = [waveform]
-        else:
-            hop = window_size // 2
+        if long_form:
             windows = [
                 waveform[start : start + window_size]
-                for start in range(0, len(waveform) - window_size + 1, hop)
+                for start in range(0, len(waveform), window_size)
             ]
-            if (len(waveform) - window_size) % hop:
-                windows.append(waveform[-window_size:])
+        else:
+            if len(waveform) > window_size:
+                limit = self.mos_config.max_seconds
+                warnings.warn(
+                    f"Scoring only the first {limit:g}s. Use long_form=True to score all chunks.",
+                    AudioTruncationWarning,
+                    stacklevel=3,
+                )
+            windows = [waveform[:window_size]]
         was_training = self.training
         _ = self.eval()
         try:
-            predictions: list[float] = []
+            weighted_score = 0.0
+            total_samples = 0
             for window in windows:
                 inputs = self.feature_extractor(
                     window, sampling_rate=self.mos_config.sample_rate, return_tensors="pt"
@@ -96,9 +102,10 @@ class KOMOS(PreTrainedModel):
                 assert isinstance(features, torch.Tensor)
                 features = features.to(device=self.device, dtype=self.dtype)
                 mask = torch.ones((1, len(window)), device=self.device, dtype=torch.long)
-                predictions.append(self.forward(features, mask).item())
+                weighted_score += self.forward(features, mask).item() * len(window)
+                total_samples += len(window)
             calibrated = (
-                self.mos_config.calib_a * float(np.mean(predictions)) + self.mos_config.calib_b
+                self.mos_config.calib_a * (weighted_score / total_samples) + self.mos_config.calib_b
             )
             return min(
                 self.mos_config.score_clip_max, max(self.mos_config.score_clip_min, calibrated)

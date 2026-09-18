@@ -16,6 +16,10 @@ class AudioInputError(ValueError):
     """Invalid waveform or sample rate."""
 
 
+class AudioTruncationWarning(UserWarning):
+    """Only the initial segment of an input is scored."""
+
+
 def load_audio(audio: AudioInput, sr: int | None) -> NDArray[np.float32]:
     """Load mono audio and resample to 16 kHz."""
     match audio:

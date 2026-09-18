@@ -28,6 +28,9 @@ dependencies = [
 Repository = "https://github.com/upskyy/komos"
 Model = "https://huggingface.co/upskyy/komos"
 
+[dependency-groups]
+dev = ["pytest>=8", "ruff>=0.8", "basedpyright>=1.21"]
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
@@ -48,6 +51,7 @@ ignore = ["D", "COM812", "CPY001"]
 
 [tool.ruff.lint.per-file-ignores]
 "src/komos/komos.py" = ["S101"]
+"tests/*.py" = ["S101", "PLR2004", "INP001"]
 
 [tool.basedpyright]
 typeCheckingMode = "all"
