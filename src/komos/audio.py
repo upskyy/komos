@@ -1,11 +1,12 @@
 from pathlib import Path
-from typing import Final, TypeAlias, assert_never
+from typing import Final, TypeAlias
 
 import numpy as np
 import soundfile as sf  # pyright: ignore[reportMissingTypeStubs]
 import torch
 from numpy.typing import NDArray
 from torchaudio.functional import resample  # pyright: ignore[reportMissingTypeStubs]
+from typing_extensions import assert_never
 
 AudioInput: TypeAlias = str | Path | NDArray[np.float32] | NDArray[np.float64] | torch.Tensor
 SAMPLE_RATE: Final = 16000

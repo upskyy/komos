@@ -3,7 +3,7 @@ name = "komos"
 version = "0.1.0"
 description = "Korean speech naturalness MOS prediction"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 license = "MIT"
 license-files = ["LICENSE", "NOTICE"]
 keywords = ["speech", "mos", "korean", "whisper"]
@@ -43,7 +43,7 @@ include = ["src/komos", "hubconf.py", "README.md", "LICENSE", "NOTICE", "pyproje
 
 [tool.ruff]
 line-length = 100
-target-version = "py311"
+target-version = "py310"
 
 [tool.ruff.lint]
 select = ["ALL"]
