@@ -1,0 +1,39 @@
+[project]
+name = "komos"
+version = "0.1.0"
+description = "Korean speech naturalness MOS prediction"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+dependencies = [
+    "torch>=2.6",
+    "torchaudio>=2.6",
+    "transformers>=5.14.1,<6",
+    "huggingface-hub>=1.26,<2",
+    "safetensors>=0.4",
+    "numpy>=1.26",
+    "soundfile>=0.12",
+    "typing-extensions>=4.12",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["komos"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = ["D", "COM812", "CPY001"]
+
+[tool.ruff.lint.per-file-ignores]
+"komos/modeling_komos.py" = ["S101"]
+
+[tool.basedpyright]
+typeCheckingMode = "all"
+include = ["komos", "hubconf.py"]
