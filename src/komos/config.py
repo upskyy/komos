@@ -1,10 +1,10 @@
+from dataclasses import dataclass
 from typing import ClassVar
 
-from huggingface_hub.dataclasses import strict
 from transformers import WhisperConfig
 
 
-@strict
+@dataclass
 class KOMOSConfig(WhisperConfig):
     model_type: ClassVar[str] = "komos"
     listener_emb_dim: int = 128
