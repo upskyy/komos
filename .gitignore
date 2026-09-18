@@ -12,3 +12,4 @@ dist/
 *.pt
 *.pth
 .DS_Store
+.codegraph

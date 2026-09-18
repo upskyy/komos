@@ -1,13 +1,13 @@
-from komos import KomosForMOS
+from komos import KOMOS
 
-dependencies = ["torch", "torchaudio", "transformers", "numpy", "soundfile", "huggingface_hub"]
+dependencies = ["komos", "torch", "torchaudio", "transformers", "numpy", "soundfile"]
 
 
 def komos(
     model_id: str = "upskyy/komos", device: str = "cpu", revision: str = "main"
-) -> KomosForMOS:
+) -> KOMOS:
     """Load KOMOS weights from Hugging Face."""
-    model = KomosForMOS.from_pretrained(  # pyright: ignore[reportUnknownMemberType]
+    model = KOMOS.from_pretrained(  # pyright: ignore[reportUnknownMemberType]
         model_id, revision=revision
     )
     # Transformers' decorated to() has an unbound-self typing defect.

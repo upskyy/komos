@@ -10,6 +10,8 @@ Model: [upskyy/komos](https://huggingface.co/upskyy/komos)
 
 ## Install
 
+Python 3.11 or later is required. The package is not published on PyPI yet.
+
 ```bash
 git clone https://github.com/upskyy/komos.git
 cd komos
@@ -21,14 +23,16 @@ While the repositories are private, authenticate GitHub before cloning and run `
 ## Hugging Face
 
 ```python
-from transformers import AutoModel
+from komos import KOMOS
 
-model = AutoModel.from_pretrained("upskyy/komos", trust_remote_code=True).eval()
+model = KOMOS.from_pretrained("upskyy/komos").eval()
 score = model.score("audio.wav")
 print(score)
 ```
 
 ## torch.hub
+
+Install the package first using the steps above.
 
 ```python
 import torch
@@ -59,6 +63,20 @@ File inputs are downmixed to mono and resampled to 16 kHz. Audio longer than 10 
 Higher scores indicate greater predicted naturalness, not verified pronunciation accuracy. The main test split contains seen TTS systems. Unseen-system results in the paper are an author-screened diagnostic, not independent human-MOS validation.
 
 Training code, datasets, and experiment artifacts are not included.
+
+## Package layout
+
+```text
+src/komos/
+  __init__.py
+  komos.py     # KOMOS model and scoring
+  config.py    # Model configuration
+  audio.py     # Audio loading and resampling
+```
+
+The Hugging Face repository stores weights and configuration. Inference code is provided by this package, without remote-code execution.
+
+Build the Python distribution with `uv build`. This does not publish it to PyPI.
 
 ## License
 

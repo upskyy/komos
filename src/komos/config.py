@@ -5,7 +5,7 @@ from transformers import WhisperConfig
 
 
 @strict
-class KomosConfig(WhisperConfig):
+class KOMOSConfig(WhisperConfig):
     model_type: ClassVar[str] = "komos"
     listener_emb_dim: int = 128
     num_listeners: int = 31

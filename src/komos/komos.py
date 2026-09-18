@@ -5,19 +5,19 @@ from transformers import PretrainedConfig, PreTrainedModel, WhisperFeatureExtrac
 from transformers.models.whisper.modeling_whisper import WhisperEncoder
 from typing_extensions import override
 
-from .audio import AudioInput, load_audio
-from .configuration_komos import KomosConfig
+from komos.audio import AudioInput, load_audio
+from komos.config import KOMOSConfig
 
 
-class KomosForMOS(PreTrainedModel):
-    config_class: type[PretrainedConfig] | None = KomosConfig
+class KOMOS(PreTrainedModel):
+    config_class: type[PretrainedConfig] | None = KOMOSConfig
     base_model_prefix: str = "backbone"
     main_input_name: str = "input_features"
     _supports_sdpa: bool = True
 
-    def __init__(self, config: KomosConfig) -> None:
+    def __init__(self, config: KOMOSConfig) -> None:
         super().__init__(config)  # pyright: ignore[reportUnknownMemberType]
-        self.mos_config: KomosConfig = config
+        self.mos_config: KOMOSConfig = config
         self.backbone: WhisperEncoder = WhisperEncoder(config)
         self.listener_embedding: nn.Embedding = nn.Embedding(
             config.num_listeners, config.listener_emb_dim

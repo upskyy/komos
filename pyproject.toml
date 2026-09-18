@@ -5,6 +5,14 @@ description = "Korean speech naturalness MOS prediction"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
+license-files = ["LICENSE", "NOTICE"]
+keywords = ["speech", "mos", "korean", "whisper"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
 dependencies = [
     "torch>=2.6",
     "torchaudio>=2.6",
@@ -16,12 +24,19 @@ dependencies = [
     "typing-extensions>=4.12",
 ]
 
+[project.urls]
+Repository = "https://github.com/upskyy/komos"
+Model = "https://huggingface.co/upskyy/komos"
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["komos"]
+packages = ["src/komos"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/komos", "hubconf.py", "README.md", "LICENSE", "NOTICE", "pyproject.toml"]
 
 [tool.ruff]
 line-length = 100
@@ -32,8 +47,8 @@ select = ["ALL"]
 ignore = ["D", "COM812", "CPY001"]
 
 [tool.ruff.lint.per-file-ignores]
-"komos/modeling_komos.py" = ["S101"]
+"src/komos/komos.py" = ["S101"]
 
 [tool.basedpyright]
 typeCheckingMode = "all"
-include = ["komos", "hubconf.py"]
+include = ["src/komos", "hubconf.py"]
