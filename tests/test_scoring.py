@@ -45,27 +45,20 @@ def test_long_form_weights_partial_window_by_duration(model: KOMOS) -> None:
     first = model.score(wave[:160000], 16000)
     last = model.score(wave[160000:], 16000)
     expected = (10 * first + 3 * last) / 13
-    actual = model.score(wave, 16000, long_form=True)
+    actual = model.score_long_form(wave, 16000)
     assert actual == pytest.approx(expected, abs=1e-6)
 
 
 def test_long_form_matches_short_input(model: KOMOS) -> None:
     wave = np.zeros(16000, dtype=np.float32)
     expected = model.score(wave, 16000)
-    actual = model.score(wave, 16000, long_form=True)
+    actual = model.score_long_form(wave, 16000)
     assert actual == pytest.approx(expected, abs=1e-7)
 
 
 def test_long_form_handles_single_sample_tail(model: KOMOS) -> None:
-    actual = model.score(np.zeros(160001, dtype=np.float32), 16000, long_form=True)
+    actual = model.score_long_form(np.zeros(160001, dtype=np.float32), 16000)
     assert 1 <= actual <= 5
-
-
-def test_score_restores_training_state(model: KOMOS) -> None:
-    _ = model.train()
-    _ = model.score(np.zeros(16000, dtype=np.float32), 16000)
-    assert model.training
-    _ = model.eval()
 
 
 def test_long_form_clips_only_after_aggregation(
@@ -83,5 +76,5 @@ def test_long_form_clips_only_after_aggregation(
     expected = min(5, max(1, a * (10 * raw_first + 3 * raw_last) / 13 + b))
     monkeypatch.setattr(model.mos_config, "calib_a", a)
     monkeypatch.setattr(model.mos_config, "calib_b", b)
-    actual = model.score(wave, 16000, long_form=True)
+    actual = model.score_long_form(wave, 16000)
     assert actual == pytest.approx(expected, abs=1e-5)

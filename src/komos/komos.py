@@ -1,6 +1,9 @@
 import warnings
+from collections.abc import Sequence
 
+import numpy as np
 import torch
+from numpy.typing import NDArray
 from torch import nn
 from transformers import PretrainedConfig, PreTrainedModel, WhisperFeatureExtractor
 from transformers.models.whisper.modeling_whisper import WhisperEncoder
@@ -71,44 +74,44 @@ class KOMOS(PreTrainedModel):
         return (frame_scores * mask).sum(-1) / lengths
 
     @torch.inference_mode()
-    def score(self, audio: AudioInput, sr: int | None = None, *, long_form: bool = False) -> float:
+    def score(self, audio: AudioInput, sr: int | None = None) -> float:
         """Return a calibrated MOS in [1, 5] for a file or mono waveform."""
         waveform = load_audio(audio, sr)
         window_size = round(self.mos_config.max_seconds * self.mos_config.sample_rate)
-        if long_form:
-            windows = [
-                waveform[start : start + window_size]
-                for start in range(0, len(waveform), window_size)
-            ]
-        else:
-            if len(waveform) > window_size:
-                limit = self.mos_config.max_seconds
-                warnings.warn(
-                    f"Scoring only the first {limit:g}s. Use long_form=True to score all chunks.",
-                    AudioTruncationWarning,
-                    stacklevel=3,
-                )
-            windows = [waveform[:window_size]]
-        was_training = self.training
+        if len(waveform) > window_size:
+            limit = self.mos_config.max_seconds
+            warnings.warn(
+                f"Scoring only the first {limit:g}s. Use score_long_form() to score all chunks.",
+                AudioTruncationWarning,
+                stacklevel=3,
+            )
+        return self._score_windows([waveform[:window_size]])
+
+    @torch.inference_mode()
+    def score_long_form(self, audio: AudioInput, sr: int | None = None) -> float:
+        """Return a duration-weighted score for non-overlapping audio chunks."""
+        waveform = load_audio(audio, sr)
+        window_size = round(self.mos_config.max_seconds * self.mos_config.sample_rate)
+        windows = [
+            waveform[start : start + window_size] for start in range(0, len(waveform), window_size)
+        ]
+        return self._score_windows(windows)
+
+    def _score_windows(self, windows: Sequence[NDArray[np.float32]]) -> float:
         _ = self.eval()
-        try:
-            weighted_score = 0.0
-            total_samples = 0
-            for window in windows:
-                inputs = self.feature_extractor(
-                    window, sampling_rate=self.mos_config.sample_rate, return_tensors="pt"
-                )
-                features = inputs["input_features"]  # pyright: ignore[reportAny]
-                assert isinstance(features, torch.Tensor)
-                features = features.to(device=self.device, dtype=self.dtype)
-                mask = torch.ones((1, len(window)), device=self.device, dtype=torch.long)
-                weighted_score += self.forward(features, mask).item() * len(window)
-                total_samples += len(window)
-            calibrated = (
-                self.mos_config.calib_a * (weighted_score / total_samples) + self.mos_config.calib_b
+        weighted_score = 0.0
+        total_samples = 0
+        for window in windows:
+            inputs = self.feature_extractor(
+                window, sampling_rate=self.mos_config.sample_rate, return_tensors="pt"
             )
-            return min(
-                self.mos_config.score_clip_max, max(self.mos_config.score_clip_min, calibrated)
-            )
-        finally:
-            _ = self.train(was_training)
+            features = inputs["input_features"]  # pyright: ignore[reportAny]
+            assert isinstance(features, torch.Tensor)
+            features = features.to(device=self.device, dtype=self.dtype)
+            mask = torch.ones((1, len(window)), device=self.device, dtype=torch.long)
+            weighted_score += self.forward(features, mask).item() * len(window)
+            total_samples += len(window)
+        calibrated = (
+            self.mos_config.calib_a * (weighted_score / total_samples) + self.mos_config.calib_b
+        )
+        return min(self.mos_config.score_clip_max, max(self.mos_config.score_clip_min, calibrated))

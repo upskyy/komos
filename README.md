@@ -60,15 +60,19 @@ audio, sr = sf.read("audio.wav", dtype="float32", always_2d=True)
 print(model.score(audio.mean(axis=1), sr=sr))
 ```
 
-File inputs are downmixed to mono and resampled to 16 kHz. By default, KOMOS scores only the first 10 seconds, matching the input processing used for training and evaluation. Longer inputs trigger a warning. The returned score describes the initial segment, not the entire recording.
+File inputs are downmixed to mono and resampled to 16 kHz. Although Whisper commonly uses a 30-second input window, KOMOS was trained and evaluated with a 10-second window. By default, KOMOS therefore scores only the first 10 seconds. Longer inputs trigger a warning. The returned score describes the initial segment, not the entire recording.
 
 For optional long-form scoring:
 
 ```python
-score = model.score("long_audio.wav", long_form=True)
+score = model.score_long_form("long_audio.wav")
 ```
 
 This mode splits audio into non-overlapping 10-second chunks and weights raw scores by each chunk's duration, including the final partial chunk. Validation-fitted affine calibration and clipping to [1, 5] are applied once after aggregation. This convenience mode has not been validated against human MOS for long recordings.
+
+Unless otherwise specified, “KOMOS score” refers to the default utterance-level inference protocol, which uses up to the first 10 seconds of each utterance.
+
+For comparable system-level reporting, score each utterance independently using the default inference mode and report the unweighted mean across utterances. If long-form scoring is used, please report it explicitly, as it follows a different inference protocol from the default utterance-level KOMOS score.
 
 Both modes return calibrated scores. Use `model.to("cuda")` for GPU inference. The paper's correlation results use raw predictions, and the reported three-seed means are not reproduced by this single checkpoint alone.
 
