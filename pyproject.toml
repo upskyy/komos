@@ -29,7 +29,7 @@ Repository = "https://github.com/upskyy/komos"
 Model = "https://huggingface.co/upskyy/komos"
 
 [dependency-groups]
-dev = ["pytest>=8", "ruff>=0.8", "basedpyright>=1.21"]
+dev = ["pytest>=8", "ruff>=0.8", "basedpyright>=1.21", "pre-commit>=4"]
 
 [build-system]
 requires = ["hatchling"]

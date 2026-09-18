@@ -10,7 +10,7 @@ Model: [upskyy/komos](https://huggingface.co/upskyy/komos)
 
 ## Install
 
-Python 3.11 or later is required. The package is not published on PyPI yet.
+Python 3.10 or later is required. The package is not published on PyPI yet.
 
 ```bash
 git clone https://github.com/upskyy/komos.git
@@ -91,6 +91,14 @@ The Hugging Face repository stores weights and configuration. Inference code is 
 Weights are stored in FP16 to reduce download size. The model configuration and torch.hub loader default to FP32 computation. This reduces storage, not runtime memory. Full FP16 computation has not been validated. The original FP32 checkpoint remains available at revision `f447f86f062872cb3edc31a71077fc5e761d4840`.
 
 Build the Python distribution with `uv build`. This does not publish it to PyPI.
+
+## Development
+
+```bash
+uv sync
+uv run pre-commit install
+uv run pre-commit run --all-files
+```
 
 ## License
 
