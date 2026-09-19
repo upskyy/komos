@@ -49,6 +49,23 @@ For a private GitHub repository, use the authenticated local clone:
 model = torch.hub.load(".", "komos", source="local")
 ```
 
+## ONNX Runtime
+
+Install the ONNX Runtime extra:
+
+```bash
+uv sync --no-dev --extra onnx
+```
+
+```python
+from komos.onnx import KOMOSOnnx
+
+model = KOMOSOnnx.from_pretrained("upskyy/komos")
+print(model.score("audio.wav"))
+```
+
+The opset 17 graph uses a dynamic batch dimension with fixed 10-second inputs: `input_features` has shape `[batch, 80, 1000]` and `attention_mask` has shape `[batch, 160000]`. The graph output `raw_score` is uncalibrated. Use `KOMOSOnnx` for the calibrated and clipped 1–5 score reported by the public inference API.
+
 ## Audio input
 
 `score()` accepts an audio path or a mono NumPy array/PyTorch tensor with an explicit sample rate:
@@ -86,13 +103,14 @@ Training code, datasets, and experiment artifacts are not included.
 src/komos/
   __init__.py
   komos.py     # KOMOS model and scoring
+  onnx.py      # ONNX Runtime inference
   config.py    # Model configuration
   audio.py     # Audio loading and resampling
 ```
 
 The Hugging Face repository stores weights and configuration. Inference code is provided by this package, without remote-code execution.
 
-Weights are stored in FP16 to reduce download size. The model configuration and torch.hub loader default to FP32 computation. This reduces storage, not runtime memory. Full FP16 computation has not been validated. The original FP32 checkpoint remains available at revision `f447f86f062872cb3edc31a71077fc5e761d4840`.
+PyTorch weights are stored in FP16 to reduce download size. The model configuration and torch.hub loader default to FP32 computation. This reduces storage, not runtime memory. Full FP16 computation has not been validated. The opset 17 ONNX graph uses FP32 weights. The original FP32 PyTorch checkpoint remains available at revision `f447f86f062872cb3edc31a71077fc5e761d4840`.
 
 Build the Python distribution with `uv build`. This does not publish it to PyPI.
 

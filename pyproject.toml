@@ -24,12 +24,22 @@ dependencies = [
     "typing-extensions>=4.12",
 ]
 
+[project.optional-dependencies]
+onnx = ["onnxruntime>=1.20"]
+
 [project.urls]
 Repository = "https://github.com/upskyy/komos"
 Model = "https://huggingface.co/upskyy/komos"
 
 [dependency-groups]
-dev = ["pytest>=8", "ruff>=0.8", "basedpyright>=1.21", "pre-commit>=4"]
+dev = [
+    "pytest>=8",
+    "ruff>=0.8",
+    "basedpyright>=1.21",
+    "pre-commit>=4",
+    "onnx>=1.17",
+    "onnxruntime>=1.20",
+]
 
 [build-system]
 requires = ["hatchling"]
@@ -56,3 +66,4 @@ ignore = ["D", "COM812", "CPY001"]
 [tool.basedpyright]
 typeCheckingMode = "all"
 include = ["src/komos", "hubconf.py"]
+stubPath = "typings"

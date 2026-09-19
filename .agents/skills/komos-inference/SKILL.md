@@ -24,6 +24,17 @@ Use `model.to("cuda")` when GPU inference is requested. Do not enable remote-cod
 
 For waveform input, pass a mono NumPy array or PyTorch tensor and provide `sr`. File input is automatically downmixed to mono and resampled to 16 kHz.
 
+When the user requests ONNX Runtime, use the supported wrapper rather than invoking the graph directly:
+
+```python
+from komos.onnx import KOMOSOnnx
+
+model = KOMOSOnnx.from_pretrained("upskyy/komos")
+score = model.score("audio.wav")
+```
+
+Install the `onnx` package extra first. The opset 17 graph has a dynamic batch dimension and fixed 10-second feature and attention-mask dimensions. Its `raw_score` output is uncalibrated, while `KOMOSOnnx.score()` applies the model metadata's calibration and clipping.
+
 ## Duration behavior
 
 - KOMOS uses a 10-second input window rather than Whisper's commonly used 30-second window.
