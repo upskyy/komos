@@ -25,7 +25,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-onnx = ["onnxruntime>=1.20"]
+onnx = [
+    "onnxruntime>=1.20,<1.24; python_version < '3.11'",
+    "onnxruntime>=1.20; python_version >= '3.11'",
+]
 
 [project.urls]
 Repository = "https://github.com/upskyy/komos"
@@ -38,7 +41,8 @@ dev = [
     "basedpyright>=1.21",
     "pre-commit>=4",
     "onnx>=1.17",
-    "onnxruntime>=1.20",
+    "onnxruntime>=1.20,<1.24; python_version < '3.11'",
+    "onnxruntime>=1.20; python_version >= '3.11'",
 ]
 
 [build-system]
