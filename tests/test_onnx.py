@@ -7,6 +7,7 @@ import pytest
 import torch
 
 from komos import KOMOS, KOMOSConfig
+from komos.audio import AudioInputError
 from komos.onnx import KOMOSOnnx
 
 
@@ -93,3 +94,13 @@ def test_onnx_long_form_matches_torch(models: tuple[KOMOS, KOMOSOnnx, Path]) -> 
     expected = torch_model.score_long_form(waveform, 16000)
     actual = onnx_model.score_long_form(waveform, 16000)
     assert actual == pytest.approx(expected, abs=1e-5)
+
+
+def test_onnx_long_form_rejects_audio_over_one_minute(
+    models: tuple[KOMOS, KOMOSOnnx, Path],
+) -> None:
+    _, onnx_model, _ = models
+    waveform = np.zeros(960001, dtype=np.float32)
+
+    with pytest.raises(AudioInputError, match="60-second"):
+        onnx_model.score_long_form(waveform, 16000)

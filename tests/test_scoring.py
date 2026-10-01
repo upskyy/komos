@@ -1,11 +1,21 @@
 import warnings
+from pathlib import Path
 
 import numpy as np
 import pytest
+import soundfile as sf
 import torch
 
 from komos import KOMOS, KOMOSConfig
-from komos.audio import AudioTruncationWarning
+from komos.audio import AudioInputError, AudioTruncationWarning
+
+
+def test_default_config_uses_ten_second_whisper_window() -> None:
+    config = KOMOSConfig()
+
+    mel_frames = round(config.max_seconds * config.sample_rate / 160)
+
+    assert config.max_source_positions * 2 == mel_frames
 
 
 @pytest.fixture(scope="module")
@@ -34,6 +44,18 @@ def test_default_uses_first_ten_seconds(model: KOMOS) -> None:
     assert actual == pytest.approx(expected, abs=1e-7)
 
 
+def test_default_file_input_uses_first_ten_seconds(model: KOMOS, tmp_path: Path) -> None:
+    wave = np.random.default_rng(45).normal(0, 0.1, 176000).astype(np.float32)
+    path = tmp_path / "eleven-seconds.wav"
+    sf.write(path, wave, 16000)
+    expected = model.score(wave[:160000], 16000)
+
+    with pytest.warns(AudioTruncationWarning):
+        actual = model.score(path)
+
+    assert actual == pytest.approx(expected, abs=1e-5)
+
+
 def test_ten_seconds_emits_no_warning(model: KOMOS) -> None:
     with warnings.catch_warnings(record=True) as caught:
         _ = model.score(np.zeros(160000, dtype=np.float32), 16000)
@@ -54,6 +76,13 @@ def test_long_form_matches_short_input(model: KOMOS) -> None:
     expected = model.score(wave, 16000)
     actual = model.score_long_form(wave, 16000)
     assert actual == pytest.approx(expected, abs=1e-7)
+
+
+def test_long_form_rejects_audio_over_one_minute(model: KOMOS) -> None:
+    wave = np.zeros(960001, dtype=np.float32)
+
+    with pytest.raises(AudioInputError, match="60-second"):
+        model.score_long_form(wave, 16000)
 
 
 def test_long_form_handles_single_sample_tail(model: KOMOS) -> None:

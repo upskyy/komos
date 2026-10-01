@@ -9,7 +9,13 @@ from transformers import PretrainedConfig, PreTrainedModel, WhisperFeatureExtrac
 from transformers.models.whisper.modeling_whisper import WhisperEncoder
 from typing_extensions import override
 
-from komos.audio import AudioInput, AudioTruncationWarning, load_audio
+from komos.audio import (
+    MAX_LONG_FORM_SECONDS,
+    AudioInput,
+    AudioLimit,
+    AudioTruncationWarning,
+    load_audio,
+)
 from komos.config import KOMOSConfig
 
 
@@ -76,21 +82,29 @@ class KOMOS(PreTrainedModel):
     @torch.inference_mode()
     def score(self, audio: AudioInput, sr: int | None = None) -> float:
         """Return a calibrated MOS in [1, 5] for a file or mono waveform."""
-        waveform = load_audio(audio, sr)
-        window_size = round(self.mos_config.max_seconds * self.mos_config.sample_rate)
-        if len(waveform) > window_size:
+        loaded = load_audio(
+            audio,
+            sr,
+            AudioLimit(self.mos_config.max_seconds, truncate=True),
+        )
+        if loaded.truncated:
             limit = self.mos_config.max_seconds
             warnings.warn(
                 f"Scoring only the first {limit:g}s. Use score_long_form() to score all chunks.",
                 AudioTruncationWarning,
                 stacklevel=3,
             )
-        return self._score_windows([waveform[:window_size]])
+        return self._score_windows([loaded.waveform])
 
     @torch.inference_mode()
     def score_long_form(self, audio: AudioInput, sr: int | None = None) -> float:
-        """Return a duration-weighted score for non-overlapping audio chunks."""
-        waveform = load_audio(audio, sr)
+        """Score up to one minute using duration-weighted, non-overlapping chunks."""
+        loaded = load_audio(
+            audio,
+            sr,
+            AudioLimit(MAX_LONG_FORM_SECONDS, truncate=False),
+        )
+        waveform = loaded.waveform
         window_size = round(self.mos_config.max_seconds * self.mos_config.sample_rate)
         windows = [
             waveform[start : start + window_size] for start in range(0, len(waveform), window_size)

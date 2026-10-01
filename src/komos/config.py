@@ -12,6 +12,7 @@ class KOMOSConfig(WhisperConfig):
     mean_token_id: int = 29
     blstm_hidden: int = 256
     blstm_layers: int = 1
+    max_source_positions: int = 500
     sample_rate: int = 16000
     max_seconds: float = 10.0
     calib_a: float = 1.0

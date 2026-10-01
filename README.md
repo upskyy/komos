@@ -85,7 +85,7 @@ For optional long-form scoring:
 score = model.score_long_form("long_audio.wav")
 ```
 
-This mode splits audio into non-overlapping 10-second chunks and weights raw scores by each chunk's duration, including the final partial chunk. Validation-fitted affine calibration and clipping to [1, 5] are applied once after aggregation. This convenience mode has not been validated against human MOS for long recordings.
+This mode accepts up to 60 seconds, splits the audio into non-overlapping 10-second chunks, and weights raw scores by each chunk's duration, including the final partial chunk. Inputs longer than 60 seconds raise an error and should be processed in external batches. Validation-fitted affine calibration and clipping to [1, 5] are applied once after aggregation. This convenience mode has not been validated against human MOS for long recordings.
 
 Unless otherwise specified, “KOMOS score” refers to the default utterance-level inference protocol, which uses up to the first 10 seconds of each utterance.
 

@@ -9,7 +9,13 @@ from numpy.typing import NDArray
 from transformers import WhisperFeatureExtractor
 from typing_extensions import Protocol, Self
 
-from komos.audio import AudioInput, AudioTruncationWarning, load_audio
+from komos.audio import (
+    MAX_LONG_FORM_SECONDS,
+    AudioInput,
+    AudioLimit,
+    AudioTruncationWarning,
+    load_audio,
+)
 from komos.config import KOMOSConfig
 
 
@@ -77,20 +83,28 @@ class KOMOSOnnx:
 
     def score(self, audio: AudioInput, sr: int | None = None) -> float:
         """Return the utterance-level KOMOS score using up to the first 10 seconds."""
-        waveform = load_audio(audio, sr)
-        window_size = round(self.config.max_seconds * self.config.sample_rate)
-        if len(waveform) > window_size:
+        loaded = load_audio(
+            audio,
+            sr,
+            AudioLimit(self.config.max_seconds, truncate=True),
+        )
+        if loaded.truncated:
             limit = self.config.max_seconds
             warnings.warn(
                 f"Scoring only the first {limit:g}s. Use score_long_form() to score all chunks.",
                 AudioTruncationWarning,
                 stacklevel=3,
             )
-        return self._score_windows([waveform[:window_size]])
+        return self._score_windows([loaded.waveform])
 
     def score_long_form(self, audio: AudioInput, sr: int | None = None) -> float:
-        """Return a duration-weighted score for non-overlapping audio chunks."""
-        waveform = load_audio(audio, sr)
+        """Score up to one minute using duration-weighted, non-overlapping chunks."""
+        loaded = load_audio(
+            audio,
+            sr,
+            AudioLimit(MAX_LONG_FORM_SECONDS, truncate=False),
+        )
+        waveform = loaded.waveform
         window_size = round(self.config.max_seconds * self.config.sample_rate)
         windows = [
             waveform[start : start + window_size] for start in range(0, len(waveform), window_size)
@@ -99,23 +113,24 @@ class KOMOSOnnx:
 
     def _score_windows(self, windows: Sequence[NDArray[np.float32]]) -> float:
         window_size = round(self.config.max_seconds * self.config.sample_rate)
-        waveform_batch = np.zeros((len(windows), window_size), dtype=np.float32)
-        attention_mask = np.zeros((len(windows), window_size), dtype=np.int64)
-        durations = np.empty(len(windows), dtype=np.int64)
-        for index, window in enumerate(windows):
+        weighted_score = 0.0
+        total_samples = 0
+        for window in windows:
             duration = len(window)
-            waveform_batch[index, :duration] = window
-            attention_mask[index, :duration] = 1
-            durations[index] = duration
-        features = self.feature_extractor.extract(waveform_batch)
-        outputs = self.session.run(
-            ["raw_score"],
-            {
-                "input_features": features,
-                "attention_mask": attention_mask,
-            },
-        )
-        raw_scores = np.asarray(outputs[0], dtype=np.float32).reshape(-1)
-        weighted_score = float(np.average(raw_scores, weights=durations))
-        calibrated = self.config.calib_a * weighted_score + self.config.calib_b
+            waveform_batch = np.zeros((1, window_size), dtype=np.float32)
+            attention_mask = np.zeros((1, window_size), dtype=np.int64)
+            waveform_batch[0, :duration] = window
+            attention_mask[0, :duration] = 1
+            features = self.feature_extractor.extract(waveform_batch)
+            outputs = self.session.run(
+                ["raw_score"],
+                {
+                    "input_features": features,
+                    "attention_mask": attention_mask,
+                },
+            )
+            raw_score = float(np.average(outputs[0]))
+            weighted_score += raw_score * duration
+            total_samples += duration
+        calibrated = self.config.calib_a * (weighted_score / total_samples) + self.config.calib_b
         return min(self.config.score_clip_max, max(self.config.score_clip_min, calibrated))
