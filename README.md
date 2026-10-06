@@ -17,6 +17,16 @@ KOMOS is a Korean mean opinion score predictor for overall speech quality across
 
 ## Results
 
+### Human MOS alignment
+
+KOMOS follows the human MOS scale more closely.
+
+<p align="center">
+  <img src="assets/mos_alignment.png" alt="KOMOS predictions align more closely with human MOS than UTMOS v1" width="720">
+</p>
+
+<p align="center"><em>Mean predicted MOS by human-MOS bucket after validation-set affine calibration. The dashed line shows ideal alignment.</em></p>
+
 ### Overall test performance
 
 Utterance-level correlation with human MOS on the 100-utterance test set. UTMOS v1 and v2 are evaluated as English-trained zero-shot baselines, while KOMOS is fine-tuned on Korean quality ratings.
@@ -26,14 +36,6 @@ Utterance-level correlation with human MOS on the 100-utterance test set. UTMOS 
 | UTMOS v1 | 0.703 | 0.798 |
 | UTMOS v2 | 0.767 | 0.858 |
 | **KOMOS** | **0.900** | **0.950** |
-
-KOMOS improves test SRCC by 0.133 over the stronger UTMOS v2 baseline, showing a stronger monotonic and linear association with human judgments.
-
-<p align="center">
-  <img src="assets/mos_alignment.png" alt="KOMOS predictions align more closely with human MOS than UTMOS v1" width="720">
-</p>
-
-<p align="center"><em>Mean predicted MOS by human-MOS bucket after validation-set affine calibration. The dashed line shows ideal alignment.</em></p>
 
 ### Speaker-disjoint and text-disjoint evaluation
 
