@@ -45,8 +45,6 @@ Utterance-level SRCC on test subsets whose speakers or texts are absent from bot
 | UTMOS v2 | 0.767 | 0.823 | 0.778 |
 | **KOMOS** | **0.900** | **0.951** | **0.878** |
 
-KOMOS maintains the highest rank correlation on both subsets, supporting generalization to held-out speakers and texts within the main seen-system setting.
-
 ## Installation
 
 Python 3.10 or later is required.
