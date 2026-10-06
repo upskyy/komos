@@ -100,12 +100,6 @@ print(model.score("audio.wav"))
 
 For comparable system-level results, score each utterance independently with `score()` and report the unweighted mean.
 
-## Limitations
-
-KOMOS predicts overall speech quality. It does not independently verify pronunciation accuracy or intelligibility. The main test split is a seen-system setting, and long-form scoring has not been validated against human MOS for long recordings.
-
-This repository provides inference code and model weights. The training dataset and experiment artifacts are not included.
-
 ## License
 
 KOMOS is released under the MIT License. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
