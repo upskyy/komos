@@ -71,6 +71,15 @@ print(score)
 
 Move the model to CUDA with `model.to("cuda")` when GPU inference is needed.
 
+### torch.hub
+
+```python
+import torch
+
+model = torch.hub.load("upskyy/komos:main", "komos", trust_repo=True)
+print(model.score("audio.wav"))
+```
+
 ### ONNX Runtime
 
 ```bash
@@ -83,15 +92,6 @@ from komos.onnx import KOMOSOnnx
 model = KOMOSOnnx.from_pretrained("upskyy/komos")
 score = model.score("audio.wav")
 print(score)
-```
-
-### torch.hub
-
-```python
-import torch
-
-model = torch.hub.load("upskyy/komos:main", "komos", trust_repo=True)
-print(model.score("audio.wav"))
 ```
 
 ## Inference

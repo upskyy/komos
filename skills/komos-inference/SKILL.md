@@ -25,6 +25,15 @@ Move the model to CUDA with `model.to("cuda")` when GPU inference is needed. Do 
 
 For waveform input, pass a mono NumPy array or PyTorch tensor and provide `sr`. File input is automatically downmixed to mono and resampled to 16 kHz.
 
+### torch.hub
+
+```python
+import torch
+
+model = torch.hub.load("upskyy/komos:main", "komos", trust_repo=True)
+print(model.score("audio.wav"))
+```
+
 ### ONNX Runtime
 
 Install the `onnx` package extra:
@@ -44,15 +53,6 @@ print(score)
 ```
 
 The opset 17 graph has a dynamic batch dimension and fixed 10-second feature and attention-mask dimensions. Its `raw_score` output is uncalibrated, while `KOMOSOnnx.score()` applies the model metadata's calibration and clipping.
-
-### torch.hub
-
-```python
-import torch
-
-model = torch.hub.load("upskyy/komos:main", "komos", trust_repo=True)
-print(model.score("audio.wav"))
-```
 
 ## Duration behavior
 
