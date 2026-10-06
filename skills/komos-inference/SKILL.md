@@ -14,11 +14,9 @@ Prefer the Hugging Face loading path unless the user specifically requests `torc
 ### PyTorch
 
 ```python
-import torch
-
 from komos import KOMOS
 
-model = KOMOS.from_pretrained("upskyy/komos", dtype=torch.float32).eval()
+model = KOMOS.from_pretrained("upskyy/komos").eval()
 score = model.score("audio.wav")
 print(score)
 ```

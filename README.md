@@ -62,11 +62,9 @@ uv sync --no-dev
 ### PyTorch
 
 ```python
-import torch
-
 from komos import KOMOS
 
-model = KOMOS.from_pretrained("upskyy/komos", dtype=torch.float32).eval()
+model = KOMOS.from_pretrained("upskyy/komos").eval()
 score = model.score("audio.wav")
 print(score)
 ```
