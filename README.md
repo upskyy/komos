@@ -19,9 +19,9 @@ KOMOS is a Korean mean opinion score predictor for overall speech quality across
 
 ### Overall test performance
 
-Utterance-level correlation with human MOS on the 100-utterance test set. UTMOS v1 and v2 are evaluated as English-trained zero-shot baselines, while KOMOS is fine-tuned on Korean quality ratings. Higher is better.
+Utterance-level correlation with human MOS on the 100-utterance test set. UTMOS v1 and v2 are evaluated as English-trained zero-shot baselines, while KOMOS is fine-tuned on Korean quality ratings.
 
-| Model | Test SRCC | Test LCC |
+| Model | Test SRCC ↑ | Test LCC ↑ |
 | --- | ---: | ---: |
 | UTMOS v1 | 0.703 | 0.798 |
 | UTMOS v2 | 0.767 | 0.858 |
@@ -33,7 +33,7 @@ KOMOS improves test SRCC by 0.133 over the stronger UTMOS v2 baseline, showing a
 
 Utterance-level SRCC on test subsets whose speakers or texts are absent from both the training and validation sets.
 
-| Model | Overall (n=100) | Speaker-disjoint (n=34) | Text-disjoint (n=55) |
+| Model | Overall ↑ (n=100) | Speaker-disjoint ↑ (n=34) | Text-disjoint ↑ (n=55) |
 | --- | ---: | ---: | ---: |
 | UTMOS v1 | 0.703 | 0.818 | 0.719 |
 | UTMOS v2 | 0.767 | 0.823 | 0.778 |
