@@ -41,11 +41,14 @@ def _limited_frames(
 ) -> tuple[int | None, bool]:
     if limit is None:
         return None, False
+
     max_frames = ceil(limit.seconds * input_rate)
     if total_frames <= max_frames:
         return None, False
+
     if limit.truncate:
         return max_frames, True
+
     message = (
         f"Audio exceeds the {limit.seconds:g}-second score_long_form() limit. "
         "Process longer recordings in external batches."
@@ -57,6 +60,7 @@ def _require_input_rate(input_rate: int | None) -> int:
     if input_rate is None or input_rate <= 0:
         message = "Provide a positive sr for waveform input."
         raise AudioInputError(message)
+
     return input_rate
 
 
@@ -64,12 +68,14 @@ def _load_file(audio: str | Path, limit: AudioLimit | None) -> tuple[torch.Tenso
     audio_info = sf.info(audio)
     input_rate = audio_info.samplerate
     frame_limit, truncated = _limited_frames(audio_info.frames, input_rate, limit)
+
     samples, _ = sf.read(
         audio,
         frames=-1 if frame_limit is None else frame_limit,
         dtype="float32",
         always_2d=True,
     )
+
     return torch.as_tensor(samples.mean(axis=1)), input_rate, truncated
 
 
@@ -79,21 +85,27 @@ def _load_waveform(
     limit: AudioLimit | None,
 ) -> tuple[torch.Tensor, int, bool]:
     input_rate = _require_input_rate(sr)
+
     match audio:
         case torch.Tensor():
             if audio.ndim != 1 or audio.numel() < MIN_SAMPLES:
                 message = "Expected a mono waveform with at least two samples."
                 raise AudioInputError(message)
+
             frame_limit, truncated = _limited_frames(audio.numel(), input_rate, limit)
             waveform = audio[:frame_limit].detach().to(device="cpu", dtype=torch.float32)
+
         case np.ndarray():
             if audio.ndim != 1 or audio.size < MIN_SAMPLES:
                 message = "Expected a mono waveform with at least two samples."
                 raise AudioInputError(message)
+
             frame_limit, truncated = _limited_frames(audio.size, input_rate, limit)
             waveform = torch.as_tensor(np.array(audio[:frame_limit], dtype=np.float32, copy=True))
+
         case unreachable:  # pyright: ignore[reportUnnecessaryComparison]
             assert_never(unreachable)
+
     return waveform, input_rate, truncated
 
 
@@ -106,12 +118,15 @@ def load_audio(audio: AudioInput, sr: int | None, limit: AudioLimit | None = Non
             waveform, input_rate, truncated = _load_waveform(audio, sr, limit)
         case unreachable:  # pyright: ignore[reportUnnecessaryComparison]
             assert_never(unreachable)
+
     if waveform.ndim != 1 or waveform.numel() < MIN_SAMPLES:
         message = "Expected a mono waveform with at least two samples."
         raise AudioInputError(message)
+
     if not bool(torch.isfinite(waveform).all()):
         message = "Audio must contain only finite samples."
         raise AudioInputError(message)
+
     if input_rate != SAMPLE_RATE:
         common_divisor = gcd(input_rate, SAMPLE_RATE)
         resampled = resample_poly(
@@ -120,9 +135,12 @@ def load_audio(audio: AudioInput, sr: int | None, limit: AudioLimit | None = Non
             input_rate // common_divisor,
         )
         waveform = torch.as_tensor(resampled, dtype=torch.float32)
+
     if truncated and limit is not None:
         waveform = waveform[: round(limit.seconds * SAMPLE_RATE)]
+
     if waveform.numel() < MIN_SAMPLES:
         message = "Audio is too short after resampling."
         raise AudioInputError(message)
+
     return LoadedAudio(np.asarray(waveform, dtype=np.float32), truncated)
