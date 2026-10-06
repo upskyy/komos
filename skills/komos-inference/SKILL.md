@@ -11,6 +11,8 @@ Use the repository's public inference API and treat `README.md` as the source of
 
 Prefer the Hugging Face loading path unless the user specifically requests `torch.hub`:
 
+### PyTorch
+
 ```python
 import torch
 
@@ -18,22 +20,41 @@ from komos import KOMOS
 
 model = KOMOS.from_pretrained("upskyy/komos", dtype=torch.float32).eval()
 score = model.score("audio.wav")
+print(score)
 ```
 
-Use `model.to("cuda")` when GPU inference is requested. Do not enable remote-code execution; the inference implementation is provided by this package.
+Move the model to CUDA with `model.to("cuda")` when GPU inference is needed. Do not enable remote-code execution; the inference implementation is provided by this package.
 
 For waveform input, pass a mono NumPy array or PyTorch tensor and provide `sr`. File input is automatically downmixed to mono and resampled to 16 kHz.
 
-When the user requests ONNX Runtime, use the supported wrapper rather than invoking the graph directly:
+### ONNX Runtime
+
+Install the `onnx` package extra:
+
+```bash
+uv sync --no-dev --extra onnx
+```
+
+Use the supported wrapper rather than invoking the graph directly:
 
 ```python
 from komos.onnx import KOMOSOnnx
 
 model = KOMOSOnnx.from_pretrained("upskyy/komos")
 score = model.score("audio.wav")
+print(score)
 ```
 
-Install the `onnx` package extra first. The opset 17 graph has a dynamic batch dimension and fixed 10-second feature and attention-mask dimensions. Its `raw_score` output is uncalibrated, while `KOMOSOnnx.score()` applies the model metadata's calibration and clipping.
+The opset 17 graph has a dynamic batch dimension and fixed 10-second feature and attention-mask dimensions. Its `raw_score` output is uncalibrated, while `KOMOSOnnx.score()` applies the model metadata's calibration and clipping.
+
+### torch.hub
+
+```python
+import torch
+
+model = torch.hub.load("upskyy/komos:main", "komos", trust_repo=True)
+print(model.score("audio.wav"))
+```
 
 ## Duration behavior
 
