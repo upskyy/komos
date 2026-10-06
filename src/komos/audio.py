@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from math import ceil
+from math import ceil, gcd
 from pathlib import Path
 from typing import Final, TypeAlias
 
@@ -7,7 +7,7 @@ import numpy as np
 import soundfile as sf
 import torch
 from numpy.typing import NDArray
-from torchaudio.functional import resample  # pyright: ignore[reportMissingTypeStubs]
+from scipy.signal import resample_poly
 from typing_extensions import assert_never
 
 AudioInput: TypeAlias = str | Path | NDArray[np.float32] | NDArray[np.float64] | torch.Tensor
@@ -113,7 +113,13 @@ def load_audio(audio: AudioInput, sr: int | None, limit: AudioLimit | None = Non
         message = "Audio must contain only finite samples."
         raise AudioInputError(message)
     if input_rate != SAMPLE_RATE:
-        waveform = resample(waveform, input_rate, SAMPLE_RATE)
+        common_divisor = gcd(input_rate, SAMPLE_RATE)
+        resampled = resample_poly(
+            waveform.numpy(),
+            SAMPLE_RATE // common_divisor,
+            input_rate // common_divisor,
+        )
+        waveform = torch.as_tensor(resampled, dtype=torch.float32)
     if truncated and limit is not None:
         waveform = waveform[: round(limit.seconds * SAMPLE_RATE)]
     if waveform.numel() < MIN_SAMPLES:

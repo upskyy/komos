@@ -2,7 +2,7 @@ import torch
 
 from komos import KOMOS
 
-dependencies = ["komos", "torch", "torchaudio", "transformers", "numpy", "soundfile"]
+dependencies = ["komos", "torch", "transformers", "numpy", "scipy", "soundfile"]
 
 
 def komos(model_id: str = "upskyy/komos", device: str = "cpu", revision: str = "main") -> KOMOS:
