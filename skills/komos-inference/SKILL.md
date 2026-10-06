@@ -1,6 +1,6 @@
 ---
 name: komos-inference
-description: Install, run, or integrate KOMOS for Korean speech naturalness MOS prediction. Use when scoring audio with KOMOS, adding KOMOS inference to Python code, or explaining KOMOS outputs and audio handling.
+description: Install, run, or integrate KOMOS for Korean speech quality MOS prediction. Use when scoring audio with KOMOS, adding KOMOS inference to Python code, or explaining KOMOS outputs and audio handling.
 ---
 
 # KOMOS Inference
@@ -39,7 +39,7 @@ Install the `onnx` package extra first. The opset 17 graph has a dynamic batch d
 
 - KOMOS uses a 10-second input window rather than Whisper's commonly used 30-second window.
 - Use `score()` for the default utterance-level KOMOS score. It scores the first 10 seconds and matches the training and evaluation input processing.
-- Use the separate `score_long_form()` method only when the user wants a score for an entire recording longer than 10 seconds.
+- Use `score_long_form()` for recordings longer than 10 seconds and up to 60 seconds. Longer inputs raise an error and should be processed in external batches.
 - Long-form mode splits audio into non-overlapping 10-second chunks and computes a duration-weighted mean of raw chunk scores before calibration.
 - State that long-form scoring is a convenience mode that has not been validated against human MOS for long recordings when this affects interpretation.
 
@@ -50,4 +50,4 @@ For comparable system-level reporting, score each utterance independently using 
 ## Interpret scores
 
 - `score()` returns a validation-calibrated prediction clipped to the 1--5 MOS range. Do not apply calibration or clipping again.
-- Higher scores indicate greater predicted naturalness. Do not present them as verified pronunciation accuracy or intelligibility scores.
+- Higher scores indicate greater predicted overall speech quality. Do not present them as verified pronunciation accuracy or intelligibility scores.

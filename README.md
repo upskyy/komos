@@ -1,16 +1,33 @@
-# KOMOS
+<h1 align="center">KOMOS</h1>
 
-Inference code for **KOMOS: Automatic Mean Opinion Score Estimation for Korean Speech**.
+<p align="center"><strong>Automatic Mean Opinion Score Estimation for Korean Speech</strong></p>
 
-KOMOS predicts Korean speech naturalness on a 1–5 MOS scale using a Whisper-medium encoder and a listener-conditioned prediction head. It is fine-tuned on 1,000 utterances with 5,000 human ratings covering read and spontaneous speech.
+<p align="center">
+  🤗 <a href="https://huggingface.co/upskyy/komos"><strong>Hugging Face Model</strong></a>
+</p>
 
-The paper reports test SRCC/LCC of **0.900/0.950**, averaged over three training seeds. The released checkpoint is the **seed 42** model, not an ensemble.
+KOMOS is a Korean mean opinion score predictor for overall speech quality across read and spontaneous speech. It combines a fully fine-tuned Whisper-medium encoder with a listener-conditioned prediction head and returns a score on the 1–5 MOS scale.
 
-Model: [upskyy/komos](https://huggingface.co/upskyy/komos)
+## Highlights
 
-## Install
+- Trained with 5,000 ratings from 29 native Korean listeners for 1,000 utterances.
+- Covers real recordings, synthesized speech, and degraded speech.
+- Supports PyTorch and ONNX Runtime inference.
+- Uses a fixed 10-second input protocol for utterance-level scoring.
 
-Python 3.10 or later is required. The package is not published on PyPI yet.
+## Results
+
+| Model | Test SRCC | Test LCC |
+| --- | ---: | ---: |
+| UTMOS v1 | 0.703 | 0.798 |
+| UTMOS v2 | 0.767 | 0.858 |
+| **KOMOS** | **0.900** | **0.950** |
+
+The reported results are averages over three training seeds. The released checkpoint is the seed 42 model, not an ensemble.
+
+## Installation
+
+Python 3.10 or later is required.
 
 ```bash
 git clone https://github.com/upskyy/komos.git
@@ -18,9 +35,9 @@ cd komos
 uv sync --no-dev
 ```
 
-While the repositories are private, authenticate GitHub before cloning and run `uv run hf auth login` with a Hugging Face account that has model access.
+## Quickstart
 
-## Hugging Face
+### PyTorch
 
 ```python
 import torch
@@ -32,26 +49,9 @@ score = model.score("audio.wav")
 print(score)
 ```
 
-## torch.hub
+Move the model to CUDA with `model.to("cuda")` when GPU inference is needed.
 
-Install the package first using the steps above.
-
-```python
-import torch
-
-model = torch.hub.load("upskyy/komos:main", "komos", trust_repo=True)
-print(model.score("audio.wav"))
-```
-
-For a private GitHub repository, use the authenticated local clone:
-
-```python
-model = torch.hub.load(".", "komos", source="local")
-```
-
-## ONNX Runtime
-
-Install the ONNX Runtime extra:
+### ONNX Runtime
 
 ```bash
 uv sync --no-dev --extra onnx
@@ -61,67 +61,35 @@ uv sync --no-dev --extra onnx
 from komos.onnx import KOMOSOnnx
 
 model = KOMOSOnnx.from_pretrained("upskyy/komos")
+score = model.score("audio.wav")
+print(score)
+```
+
+### torch.hub
+
+```python
+import torch
+
+model = torch.hub.load("upskyy/komos:main", "komos", trust_repo=True)
 print(model.score("audio.wav"))
 ```
 
-The opset 17 graph uses a dynamic batch dimension with fixed 10-second inputs: `input_features` has shape `[batch, 80, 1000]` and `attention_mask` has shape `[batch, 160000]`. The graph output `raw_score` is uncalibrated. Use `KOMOSOnnx` for the calibrated and clipped 1–5 score reported by the public inference API.
+## Inference
 
-## Audio input
+`score()` accepts an audio path or a mono NumPy array or PyTorch tensor with an explicit sample rate. File inputs are downmixed to mono and resampled to 16 kHz.
 
-`score()` accepts an audio path or a mono NumPy array/PyTorch tensor with an explicit sample rate:
+- `score()` evaluates up to the first 10 seconds and returns a validation-calibrated score clipped to the 1–5 range.
+- `score_long_form()` accepts up to 60 seconds and aggregates non-overlapping 10-second chunks by duration.
+- Inputs longer than 60 seconds should be processed in external batches.
 
-```python
-import soundfile as sf
+For comparable system-level results, score each utterance independently with `score()` and report the unweighted mean.
 
-audio, sr = sf.read("audio.wav", dtype="float32", always_2d=True)
-print(model.score(audio.mean(axis=1), sr=sr))
-```
+## Limitations
 
-File inputs are downmixed to mono and resampled to 16 kHz. Although Whisper commonly uses a 30-second input window, KOMOS was trained and evaluated with a 10-second window. By default, KOMOS therefore scores only the first 10 seconds. Longer inputs trigger a warning. The returned score describes the initial segment, not the entire recording.
+KOMOS predicts overall speech quality. It does not independently verify pronunciation accuracy or intelligibility. The main test split is a seen-system setting, and long-form scoring has not been validated against human MOS for long recordings.
 
-For optional long-form scoring:
-
-```python
-score = model.score_long_form("long_audio.wav")
-```
-
-This mode accepts up to 60 seconds, splits the audio into non-overlapping 10-second chunks, and weights raw scores by each chunk's duration, including the final partial chunk. Inputs longer than 60 seconds raise an error and should be processed in external batches. Validation-fitted affine calibration and clipping to [1, 5] are applied once after aggregation. This convenience mode has not been validated against human MOS for long recordings.
-
-Unless otherwise specified, “KOMOS score” refers to the default utterance-level inference protocol, which uses up to the first 10 seconds of each utterance.
-
-For comparable system-level reporting, score each utterance independently using the default inference mode and report the unweighted mean across utterances. If long-form scoring is used, please report it explicitly, as it follows a different inference protocol from the default utterance-level KOMOS score.
-
-Both modes return calibrated scores. Use `model.to("cuda")` for GPU inference. The paper's correlation results use raw predictions, and the reported three-seed means are not reproduced by this single checkpoint alone.
-
-Higher scores indicate greater predicted naturalness, not verified pronunciation accuracy. The main test split contains seen TTS systems. Unseen-system results in the paper are an author-screened diagnostic, not independent human-MOS validation.
-
-Training code, datasets, and experiment artifacts are not included.
-
-## Package layout
-
-```text
-src/komos/
-  __init__.py
-  komos.py     # KOMOS model and scoring
-  onnx.py      # ONNX Runtime inference
-  config.py    # Model configuration
-  audio.py     # Audio loading and resampling
-```
-
-The Hugging Face repository stores weights and configuration. Inference code is provided by this package, without remote-code execution.
-
-PyTorch weights are stored in FP16 to reduce download size. The model configuration and torch.hub loader default to FP32 computation. This reduces storage, not runtime memory. Full FP16 computation has not been validated. The opset 17 ONNX graph uses FP32 weights. The original FP32 PyTorch checkpoint remains available at revision `f447f86f062872cb3edc31a71077fc5e761d4840`.
-
-Build the Python distribution with `uv build`. This does not publish it to PyPI.
-
-## Development
-
-```bash
-uv sync
-uv run pre-commit install
-uv run pre-commit run --all-files
-```
+This repository provides inference code and model weights. The training dataset and experiment artifacts are not included.
 
 ## License
 
-MIT. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
+KOMOS is released under the MIT License. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
