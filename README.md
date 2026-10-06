@@ -33,7 +33,7 @@ KOMOS improves test SRCC by 0.133 over the stronger UTMOS v2 baseline, showing a
 
 Utterance-level SRCC on test subsets whose speakers or texts are absent from both the training and validation sets.
 
-| Model | Overall ↑ (n=100) | Speaker-disjoint ↑ (n=34) | Text-disjoint ↑ (n=55) |
+| Model | Overall ↑ | Speaker-disjoint ↑ | Text-disjoint ↑ |
 | --- | ---: | ---: | ---: |
 | UTMOS v1 | 0.703 | 0.818 | 0.719 |
 | UTMOS v2 | 0.767 | 0.823 | 0.778 |
