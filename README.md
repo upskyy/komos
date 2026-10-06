@@ -29,7 +29,7 @@ KOMOS follows the human MOS scale more closely.
 
 ### Overall test performance
 
-Utterance-level correlation with human MOS on the 100-utterance test set. UTMOS v1 and v2 are evaluated as English-trained zero-shot baselines, while KOMOS is fine-tuned on Korean quality ratings.
+Utterance-level correlation with human MOS on the 100 utterance test set. UTMOS v1 and v2 are evaluated as English-trained zero-shot baselines, while KOMOS is fine-tuned on Korean quality ratings.
 
 | Model | Test SRCC ↑ | Test LCC ↑ |
 | --- | ---: | ---: |
