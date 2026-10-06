@@ -29,6 +29,12 @@ Utterance-level correlation with human MOS on the 100-utterance test set. UTMOS 
 
 KOMOS improves test SRCC by 0.133 over the stronger UTMOS v2 baseline, showing a stronger monotonic and linear association with human judgments.
 
+<p align="center">
+  <img src="assets/mos_alignment.png" alt="KOMOS predictions align more closely with human MOS than UTMOS v1" width="720">
+</p>
+
+<p align="center"><em>Mean predicted MOS by human-MOS bucket after validation-set affine calibration. The dashed line shows ideal alignment.</em></p>
+
 ### Speaker-disjoint and text-disjoint evaluation
 
 Utterance-level SRCC on test subsets whose speakers or texts are absent from both the training and validation sets.
