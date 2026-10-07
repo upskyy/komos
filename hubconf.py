@@ -1,12 +1,30 @@
+import sys
+from pathlib import Path
+
 import torch
 
-from komos import KOMOS
+dependencies = [
+    "torch",
+    "transformers",
+    "huggingface_hub",
+    "safetensors",
+    "numpy",
+    "scipy",
+    "soundfile",
+    "typing_extensions",
+]
 
-dependencies = ["komos", "torch", "transformers", "numpy", "scipy", "soundfile"]
 
-
-def komos(model_id: str = "upskyy/komos", device: str = "cpu", revision: str = "main") -> KOMOS:
+def komos(
+    model_id: str = "upskyy/komos", device: str = "cpu", revision: str = "main"
+) -> torch.nn.Module:
     """Load KOMOS weights from Hugging Face."""
+    source_root = str(Path(__file__).resolve().parent / "src")
+    if source_root not in sys.path:
+        sys.path.insert(0, source_root)
+
+    from komos import KOMOS  # noqa: PLC0415
+
     model = KOMOS.from_pretrained(  # pyright: ignore[reportUnknownMemberType]
         model_id, revision=revision, dtype=torch.float32
     )

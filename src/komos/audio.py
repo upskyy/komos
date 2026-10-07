@@ -129,8 +129,9 @@ def load_audio(audio: AudioInput, sr: int | None, limit: AudioLimit | None = Non
 
     if input_rate != SAMPLE_RATE:
         common_divisor = gcd(input_rate, SAMPLE_RATE)
+        waveform_array: NDArray[np.float32] = np.asarray(waveform, dtype=np.float32)
         resampled = resample_poly(
-            waveform.numpy(),
+            waveform_array,
             SAMPLE_RATE // common_divisor,
             input_rate // common_divisor,
         )

@@ -62,6 +62,16 @@ def test_ten_seconds_emits_no_warning(model: KOMOS) -> None:
     assert not caught
 
 
+def test_model_save_and_load_preserves_scores(model: KOMOS, tmp_path: Path) -> None:
+    waveform = np.random.default_rng(46).normal(0, 0.1, 32000).astype(np.float32)
+    expected = model.score(waveform, 16000)
+
+    model.save_pretrained(tmp_path)
+    restored = KOMOS.from_pretrained(tmp_path).eval()
+
+    assert restored.score(waveform, 16000) == pytest.approx(expected, abs=1e-7)
+
+
 def test_long_form_weights_partial_window_by_duration(model: KOMOS) -> None:
     wave = np.random.default_rng(43).normal(0, 0.1, 208000).astype(np.float32)
     first = model.score(wave[:160000], 16000)

@@ -1,13 +1,14 @@
 import warnings
 from collections.abc import Mapping, Sequence
 from pathlib import Path
+from typing import cast
 
 import numpy as np
 import onnxruntime as ort
 from huggingface_hub import hf_hub_download
 from numpy.typing import NDArray
 from transformers import WhisperFeatureExtractor
-from typing_extensions import Protocol, Self
+from typing_extensions import Self
 
 from komos.audio import (
     MAX_LONG_FORM_SECONDS,
@@ -38,17 +39,15 @@ def _load_config(metadata: Mapping[str, str]) -> KOMOSConfig:
         raise _OnnxConfigError(str(error)) from error
 
 
-class _NumpyFeatureExtractor(Protocol):
-    def _np_extract_fbank_features(
-        self, waveform_batch: NDArray[np.float32], device: str
-    ) -> NDArray[np.float64]: ...
-
+class _WhisperFeatureExtractor(WhisperFeatureExtractor):
     def extract(self, waveform_batch: NDArray[np.float32]) -> NDArray[np.float32]:
-        return np.asarray(self._np_extract_fbank_features(waveform_batch, "cpu"), dtype=np.float32)
-
-
-class _WhisperFeatureExtractor(WhisperFeatureExtractor, _NumpyFeatureExtractor):
-    pass
+        inputs = self(
+            waveform_batch,
+            sampling_rate=self.sampling_rate,
+            return_tensors="np",
+        )
+        features = cast("NDArray[np.float32]", inputs["input_features"])
+        return np.asarray(features, dtype=np.float32)
 
 
 class KOMOSOnnx:
