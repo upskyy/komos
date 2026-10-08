@@ -13,7 +13,7 @@ KOMOS is a Korean mean opinion score predictor for overall speech quality across
 - Trained with 5,000 ratings from 29 native Korean listeners for 1,000 utterances.
 - Covers real recordings, synthesized speech, and degraded speech.
 - Supports PyTorch and ONNX Runtime inference.
-- Uses a fixed 10-second input protocol for utterance-level scoring.
+- The paper reports results using the utterance-level `score()` protocol with inputs of up to 10 seconds.
 
 ## Results
 
@@ -107,10 +107,8 @@ print(score)
 `score()` accepts an audio path or a mono NumPy array or PyTorch tensor with an explicit sample rate. File inputs are downmixed to mono and resampled to 16 kHz.
 
 - `score()` evaluates up to the first 10 seconds and returns a validation-calibrated score clipped to the 1–5 range.
-- `score_long_form()` accepts up to 60 seconds and aggregates non-overlapping 10-second chunks by duration.
+- `score_long_form()` supports recordings of up to 60 seconds and aggregates non-overlapping 10-second chunks by duration.
 - Inputs longer than 60 seconds should be processed in external batches.
-
-For comparable system-level results, score each utterance independently with `score()` and report the unweighted mean.
 
 ## License
 

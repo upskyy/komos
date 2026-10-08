@@ -67,13 +67,9 @@ The opset 17 graph has a dynamic batch dimension and fixed 10-second feature and
 ## Duration behavior
 
 - KOMOS uses a 10-second input window rather than Whisper's commonly used 30-second window.
-- Use `score()` for the default utterance-level KOMOS score. It scores the first 10 seconds and matches the training and evaluation input processing.
-- Use `score_long_form()` for recordings longer than 10 seconds and up to 60 seconds. Longer inputs raise an error and should be processed in external batches.
+- The paper reports results using the utterance-level `score()` protocol, which evaluates up to the first 10 seconds.
+- `score_long_form()` is the supported interface for recordings longer than 10 seconds and up to 60 seconds. Longer inputs raise an error and should be processed in external batches.
 - Long-form mode splits audio into non-overlapping 10-second chunks and computes a duration-weighted mean of raw chunk scores before calibration.
-
-Unless otherwise specified, “KOMOS score” refers to the default utterance-level inference protocol, which uses up to the first 10 seconds of each utterance.
-
-For comparable system-level reporting, score each utterance independently using the default inference mode and report the unweighted mean across utterances. If long-form scoring is used, please report it explicitly, as it follows a different inference protocol from the default utterance-level KOMOS score.
 
 ## Interpret scores
 
