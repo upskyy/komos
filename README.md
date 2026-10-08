@@ -106,7 +106,7 @@ print(score)
 `score()` accepts an audio path or a mono NumPy array or PyTorch tensor with an explicit sample rate. File inputs are downmixed to mono and resampled to 16 kHz.
 
 - `score()` evaluates up to the first 10 seconds and returns a validation-calibrated score clipped to the 1–5 range.
-- `score_long_form()` supports recordings of up to 60 seconds and aggregates non-overlapping 10-second chunks by duration.
+- `score_long_form()` supports recordings of up to 60 seconds and computes a duration-weighted mean of raw scores from non-overlapping 10-second chunks before calibration.
 - Inputs longer than 60 seconds should be processed in external batches.
 
 ## License
