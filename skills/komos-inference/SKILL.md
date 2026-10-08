@@ -70,7 +70,6 @@ The opset 17 graph has a dynamic batch dimension and fixed 10-second feature and
 - Use `score()` for the default utterance-level KOMOS score. It scores the first 10 seconds and matches the training and evaluation input processing.
 - Use `score_long_form()` for recordings longer than 10 seconds and up to 60 seconds. Longer inputs raise an error and should be processed in external batches.
 - Long-form mode splits audio into non-overlapping 10-second chunks and computes a duration-weighted mean of raw chunk scores before calibration.
-- State that long-form scoring is a convenience mode that has not been validated against human MOS for long recordings when this affects interpretation.
 
 Unless otherwise specified, “KOMOS score” refers to the default utterance-level inference protocol, which uses up to the first 10 seconds of each utterance.
 
