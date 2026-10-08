@@ -7,6 +7,22 @@ description: Install, run, or integrate KOMOS for Korean speech quality MOS pred
 
 Use the repository's public inference API and treat `README.md` as the source of truth for installation and current examples. Inspect `src/komos/` only when implementation details are needed.
 
+## Install
+
+Python 3.10 or later is required. For ordinary use, install directly from GitHub:
+
+```bash
+pip install "komos @ git+https://github.com/upskyy/komos.git"
+```
+
+For ONNX Runtime inference, install the optional extra:
+
+```bash
+pip install "komos[onnx] @ git+https://github.com/upskyy/komos.git"
+```
+
+When working from a repository checkout, use `uv sync --no-dev` for PyTorch or `uv sync --no-dev --extra onnx` for ONNX Runtime.
+
 ## Run inference
 
 Prefer the Hugging Face loading path unless the user specifically requests `torch.hub`:
@@ -35,12 +51,6 @@ print(model.score("audio.wav"))
 ```
 
 ### ONNX Runtime
-
-Install the `onnx` package extra:
-
-```bash
-uv sync --no-dev --extra onnx
-```
 
 Use the supported wrapper rather than invoking the graph directly:
 

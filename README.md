@@ -51,6 +51,14 @@ Utterance-level SRCC on test subsets whose speakers or texts are absent from bot
 
 Python 3.10 or later is required.
 
+Install KOMOS directly from GitHub:
+
+```bash
+pip install "komos @ git+https://github.com/upskyy/komos.git"
+```
+
+To work from a local checkout instead:
+
 ```bash
 git clone https://github.com/upskyy/komos.git
 cd komos
@@ -83,7 +91,7 @@ print(model.score("audio.wav"))
 ### ONNX Runtime
 
 ```bash
-uv sync --no-dev --extra onnx
+pip install "komos[onnx] @ git+https://github.com/upskyy/komos.git"
 ```
 
 ```python
