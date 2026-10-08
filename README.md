@@ -13,7 +13,6 @@ KOMOS is a Korean mean opinion score predictor for overall speech quality across
 - Trained with 5,000 ratings from 29 native Korean listeners for 1,000 utterances.
 - Covers real recordings, synthesized speech, and degraded speech.
 - Supports PyTorch and ONNX Runtime inference.
-- The paper reports results using the utterance-level `score()` protocol with inputs of up to 10 seconds.
 
 ## Results
 
