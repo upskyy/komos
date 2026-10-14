@@ -9,16 +9,16 @@ Use the repository's public inference API and treat `README.md` as the source of
 
 ## Install
 
-Python 3.10 or later is required. For ordinary use, install directly from GitHub:
+Python 3.10 or later is required. For ordinary use, install from PyPI:
 
 ```bash
-pip install "komos @ git+https://github.com/upskyy/komos.git"
+pip install komos
 ```
 
 For ONNX Runtime inference, install the optional extra:
 
 ```bash
-pip install "komos[onnx] @ git+https://github.com/upskyy/komos.git"
+pip install "komos[onnx]"
 ```
 
 When working from a repository checkout, use `uv sync --no-dev` for PyTorch or `uv sync --no-dev --extra onnx` for ONNX Runtime.
@@ -46,7 +46,7 @@ For waveform input, pass a mono NumPy array or PyTorch tensor and provide `sr`. 
 ```python
 import torch
 
-model = torch.hub.load("upskyy/komos:main", "komos", trust_repo=True)
+model = torch.hub.load("upskyy/komos:v0.0.1", "komos", trust_repo=True)
 print(model.score("audio.wav"))
 ```
 

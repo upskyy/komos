@@ -52,10 +52,10 @@ Utterance-level SRCC on test subsets whose speakers or texts are absent from bot
 
 Python 3.10 or later is required.
 
-Install KOMOS directly from GitHub:
+Install KOMOS from PyPI:
 
 ```bash
-pip install "komos @ git+https://github.com/upskyy/komos.git"
+pip install komos
 ```
 
 To work from a local checkout instead:
@@ -85,14 +85,14 @@ Move the model to CUDA with `model.to("cuda")` when GPU inference is needed.
 ```python
 import torch
 
-model = torch.hub.load("upskyy/komos:main", "komos", trust_repo=True)
+model = torch.hub.load("upskyy/komos:v0.0.1", "komos", trust_repo=True)
 print(model.score("audio.wav"))
 ```
 
 ### ONNX Runtime
 
 ```bash
-pip install "komos[onnx] @ git+https://github.com/upskyy/komos.git"
+pip install "komos[onnx]"
 ```
 
 ```python

@@ -16,7 +16,7 @@ dependencies = [
 
 
 def komos(
-    model_id: str = "upskyy/komos", device: str = "cpu", revision: str = "main"
+    model_id: str = "upskyy/komos", device: str = "cpu", revision: str = "v0.0.1"
 ) -> torch.nn.Module:
     """Load KOMOS weights from Hugging Face."""
     source_root = str(Path(__file__).resolve().parent / "src")
