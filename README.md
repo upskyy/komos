@@ -85,7 +85,7 @@ Move the model to CUDA with `model.to("cuda")` when GPU inference is needed.
 ```python
 import torch
 
-model = torch.hub.load("upskyy/komos:v0.0.1", "komos", trust_repo=True)
+model = torch.hub.load("upskyy/komos:v0.0.2", "komos", trust_repo=True)
 print(model.score("audio.wav"))
 ```
 

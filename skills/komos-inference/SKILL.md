@@ -46,7 +46,7 @@ For waveform input, pass a mono NumPy array or PyTorch tensor and provide `sr`. 
 ```python
 import torch
 
-model = torch.hub.load("upskyy/komos:v0.0.1", "komos", trust_repo=True)
+model = torch.hub.load("upskyy/komos:v0.0.2", "komos", trust_repo=True)
 print(model.score("audio.wav"))
 ```
 
