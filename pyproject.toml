@@ -1,7 +1,7 @@
 [project]
 name = "komos"
-version = "0.0.1"
-description = "Korean speech quality MOS prediction"
+version = "0.0.2"
+description = "KOMOS: Automatic Mean Opinion Score Estimation for Korean Speech"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
