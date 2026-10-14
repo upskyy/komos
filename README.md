@@ -3,7 +3,9 @@
 <p align="center"><strong>Automatic Mean Opinion Score Estimation for Korean Speech</strong></p>
 
 <p align="center">
-  🤗 <a href="https://huggingface.co/upskyy/komos"><strong>Hugging Face Model</strong></a>
+  <a href="https://arxiv.org/abs/2610.15353"><img src="https://img.shields.io/badge/arXiv-2610.15353-b31b1b?logo=arxiv&logoColor=white" alt="arXiv"></a>
+  <a href="https://huggingface.co/upskyy/komos"><img src="https://img.shields.io/badge/Hugging_Face-Model-FFD21E?logo=huggingface&logoColor=000000" alt="Hugging Face Model"></a>
+  <a href="https://github.com/upskyy/komos"><img src="https://img.shields.io/badge/GitHub-181717?logo=github&logoColor=white" alt="GitHub"></a>
 </p>
 
 KOMOS is a Korean mean opinion score predictor for overall speech quality across read and spontaneous speech. It combines a fully fine-tuned Whisper-medium encoder with a listener-conditioned prediction head and returns a score on the 1–5 MOS scale.
@@ -108,6 +110,22 @@ print(score)
 - `score()` evaluates up to the first 10 seconds and returns a validation-calibrated score clipped to the 1–5 range.
 - `score_long_form()` supports recordings of up to 60 seconds and computes a duration-weighted mean of raw scores from non-overlapping 10-second chunks before calibration.
 - Inputs longer than 60 seconds should be processed in external batches.
+
+## Citation
+
+If you use KOMOS in your research, please cite:
+
+```bibtex
+@misc{ha2026komos,
+  title         = {KOMOS: Automatic Mean Opinion Score Estimation for Korean Speech},
+  author        = {Sangchun Ha and Junwon Moon and Kyuhong Shim},
+  year          = {2026},
+  eprint        = {2610.15353},
+  archivePrefix = {arXiv},
+  primaryClass  = {eess.AS},
+  url           = {https://arxiv.org/abs/2610.15353},
+}
+```
 
 ## License
 
